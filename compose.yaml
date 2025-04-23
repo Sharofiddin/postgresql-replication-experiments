@@ -8,7 +8,7 @@ services:
     ports:
       - "5433:5432"
     volumes:
-      - ./postgres-config/primary/postgresql.conf:/etc/postgresql/postgresql.conf
+      - ./postgres-config/primary/postgresql.conf:/var/lib/postgresql/data/postgresql.conf
       - ./init-primary.sql:/docker-entrypoint-initdb.d/init.sql
       - primary-data:/var/lib/postgresql/data
   replica-sync:
@@ -20,7 +20,7 @@ services:
     ports:
       - "5434:5432"
     volumes:
-      - ./postgres-config/replica-sync/postgresql.conf:/etc/postgresql/postgresql.conf
+      - ./postgres-config/replica-sync/postgresql.conf:/var/lib/postgresql/data/postgresql.conf
       - replica-sync-data:/var/lib/postgresql/data
     depends_on:
       - primary
@@ -33,7 +33,7 @@ services:
     ports:
       - "5435:5432"
     volumes:
-      - ./postgres-config/replica-async/postgresql.conf:/etc/postgresql/postgresql.conf
+      - ./postgres-config/replica-async/postgresql.conf:/var/lib/postgresql/data/postgresql.conf
       - replica-async-data:/var/lib/postgresql/data
     depends_on:
       - primary
