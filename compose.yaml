@@ -14,66 +14,33 @@ services:
       - primary-data:/var/lib/postgresql/data
     command: 'postgres -c config_file="/etc/postgresql/postgresql.conf"'
   replica-sync:
-    image: postgres-ping:16
+    image: postgres-slave:16
     environment:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
       POSTGRES_DB: tasks
+      SLOT_NAME: 'sync_slot'
     ports:
       - "5434:5432"
     volumes:
       - ./postgres-config/replica-sync/postgresql.conf:/etc/postgresql/postgresql.conf
       - replica-sync-data:/var/lib/postgresql/data
-    command: |
-      - /bin/bash
-      - |
-        if [ ! -s "$PGDATA/PG_VERSION" ]; then
-          echo "First time running. Init configuration."
-          until ping -c 1 -W 1 primary
-          do
-            echo "Waiting for leader to ping..."
-            sleep 1s
-          done
-          su postgres
-          until pg_basebackup  -h primary -p 5432-D . -U replicator -P -v -R -X stream -S sync_slot
-          do
-            echo "Waiting for pg_basebackup..."
-            sleep 1s
-          done
-        fi
-        postgres -c config_file=/etc/postgresql/postgresql.conf
+    command: './slave-init.sh'
     depends_on:
       - primary
   replica-async:
-    image: postgres-ping:16
+    image: postgres-slave:16
     environment:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
       POSTGRES_DB: tasks
+      SLOT_NAME: 'async_slot'
     ports:
       - "5435:5432"
     volumes:
       - ./postgres-config/replica-async/postgresql.conf:/etc/postgresql/postgresql.conf
       - replica-async-data:/var/lib/postgresql/data
-    command: 
-      - /bin/bash
-      - -c
-      - |
-        if [ ! -s "$PGDATA/PG_VERSION" ]; then
-          echo "First time running. Init configuration."
-          until ping -c 1 -W 1 primary
-          do
-            echo "Waiting for leader to ping..."
-            sleep 1s
-          done
-          su postgres
-          until pg_basebackup  -h primary -p 5432 -D . -U replicator -P -v -R -X stream -S async_slot
-          do
-            echo "Waiting for pg_basebackup..."
-            sleep 1s
-          done
-        fi
-        postgres -c config_file=/etc/postgresql/postgresql.conf
+    command: './slave-init.sh' 
     depends_on:
       - primary
 volumes:
