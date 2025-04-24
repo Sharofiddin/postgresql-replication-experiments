@@ -9,6 +9,7 @@ Playing with postgresql replication.
 
 This project for experimenting sync and async replication with postgresql.
 `compose.yaml` starts 3 postgresql containers:
+
   - primary
 	- replica-sync
 	- replica-async
