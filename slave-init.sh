@@ -16,4 +16,4 @@ if [ ! -s "$PGDATA/PG_VERSION" ]; then
     chmod -R 0700 $PGDATA
     chown -R postgres:postgres $PGDATA
 fi
-su postgres -c "postgres -c config_file=/etc/postgresql/postgresql.conf"
+su postgres -c "postgres"
