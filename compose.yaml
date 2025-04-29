@@ -29,6 +29,22 @@ services:
     command: './slave-init.sh'
     depends_on:
       - primary
+  replica-sync-2:
+    image: postgres-slave:16
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: tasks
+      SLOT_NAME: 'sync_slot_2'
+      PGAPPNAME: 'replica-sync'
+    ports:
+      - "5437:5432"
+    volumes:
+      - ./postgres-config/replica-sync/postgresql.conf:/etc/postgresql/postgresql.conf
+      - replica-sync-2-data:/var/lib/postgresql/data
+    command: './slave-init.sh'
+    depends_on:
+      - primary
   replica-async:
     image: postgres-slave:16
     environment:
@@ -45,7 +61,26 @@ services:
     command: './slave-init.sh' 
     depends_on:
       - primary
+  
+  replica-async-2:
+    image: postgres-slave:16
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: tasks
+      SLOT_NAME: 'async_slot_2'
+      PGAPPNAME: 'replica-async-2'
+    ports:
+      - "5436:5432"
+    volumes:
+      - ./postgres-config/replica-async/postgresql.conf:/etc/postgresql/postgresql.conf
+      - replica-async-2-data:/var/lib/postgresql/data
+    command: './slave-init.sh' 
+    depends_on:
+      - primary
 volumes:
   primary-data:
   replica-sync-data:
+  replica-sync-2-data:
   replica-async-data:
+  replica-async-2-data:
