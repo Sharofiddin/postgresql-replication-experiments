@@ -11,8 +11,8 @@ This project for experimenting sync and async replication with postgresql.
 `compose.yaml` starts 3 postgresql containers:
 
   * primary
-	* replica-sync
-	* replica-async
+  * replica-sync
+  * replica-async
 	
 Steps:
 
@@ -22,3 +22,15 @@ Steps:
  4. Remove comment added in first stecomment added in first step
  5. Start primary `docker compose start primary`
  6. Run `select * from pg_stat_replication;` from primary DB, check if it has two replicas, with _sync_state_ sync and async.
+ 
+## Adding new replicas
+
+New replicas added in two steps:
+  * Creating replication slots in leader by 
+      ```sql
+       SELECT pg_create_physical_replication_slot('<new_slot_name>')
+       ```
+  * Adding new nodes from _compose.yaml_, we commented here, with *NOT INITIAL* 
+
+Application name is the same in sync slots, it provides failover for sync slots.
+

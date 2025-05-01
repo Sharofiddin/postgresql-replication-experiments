@@ -29,6 +29,7 @@ services:
     command: './slave-init.sh'
     depends_on:
       - primary
+  ## NOT INITIAL. this node to experiment adding new sync replica 
   replica-sync-2:
     image: postgres-slave:16
     environment:
@@ -62,6 +63,7 @@ services:
     depends_on:
       - primary
   
+  ## NOT INITIAL. this node to experiment adding new async replica 
   replica-async-2:
     image: postgres-slave:16
     environment:
