@@ -1,0 +1,25 @@
+pg_replication:
+  query: |
+    SELECT
+      application_name,
+      CASE WHEN sync_state = 'sync' THEN 1 ELSE 0 END AS is_sync,
+      EXTRACT(EPOCH FROM replay_lag) AS replay_lag_seconds,
+      EXTRACT(EPOCH FROM write_lag) AS write_lag_seconds,
+      EXTRACT(EPOCH FROM flush_lag) AS flush_lag_seconds
+    FROM pg_stat_replication
+  metrics:
+    - application_name:
+        usage: "LABEL"
+        description: "Name of the replica"
+    - is_sync:
+        usage: "GAUGE"
+        description: "1 if synchronous, 0 if asynchronous"
+    - replay_lag_seconds:
+        usage: "GAUGE"
+        description: "Replication lag in seconds"
+    - write_lag_seconds:
+        usage: "GAUGE"
+        description: "Write lag in seconds"
+    - flush_lag_seconds:
+        usage: "GAUGE"
+        description: "Flush lag in seconds"

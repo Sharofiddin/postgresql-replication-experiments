@@ -1,4 +1,21 @@
 services:
+  api:
+    image: sharofiddin/task-scheduler:1.0.0-SNAPSHOT
+    ports:
+      - "8080:8080"
+    environment:
+       QUARKUS_DATASOURCE_DB-KIND: "postgresql"
+       QUARKUS_DATASOURCE_REACTIVE_URL: "postgresql://primary:5432/tasks"
+       QUARKUS_DATASOURCE_USERNAME: "user"
+       QUARKUS_DATASOURCE_PASSWORD: "password"
+       QUARKUS_DATASOURCE_REPLICA-SYNC_DB-KIND: "postgresql"
+       QUARKUS_DATASOURCE_REPLICA-SYNC_REACTIVE_URL: "postgresql://replica-sync:5432/tasks"
+       QUARKUS_DATASOURCE_REPLICA-SYNC_USERNAMe: "user"
+       QUARKUS_DATASOURCE_REPLICA-SYNC_PASSWORD: "password"
+       QUARKUS_DATASOURCE_REPLICA-ASYNC_DB-KIND: "postgresql"
+       QUARKUS_DATASOURCE_REPLICA-ASYNC_REACTIVE_URL: "postgresql://replica-async:5432/tasks"
+       QUARKUS_DATASOURCE_REPLICA-ASYNC_USERNAME: "user"
+       QUARKUS_DATASOURCE_REPLICA-ASYNC_PASSWORD: "password"
   primary:
     image: postgres:16
     environment:
@@ -13,6 +30,19 @@ services:
       - ./init-primary.sql:/docker-entrypoint-initdb.d/init.sql
       - primary-data:/var/lib/postgresql/data
     command: 'postgres -c config_file="/etc/postgresql/postgresql.conf"'
+  # Add PostgreSQL exporter
+  postgres-exporter:
+    image: prometheuscommunity/postgres-exporter:v0.17.1
+    environment:
+      - DATA_SOURCE_NAME=postgresql://postgres:postgres@primary:5432/postgres?sslmode=disable
+    ports:
+      - "9187:9187"
+    volumes:
+      - ./metrics-config/queries.yml:/queries.yml
+    command: --extend.query-path=/queries.yml
+    depends_on:
+      - primary
+  
   replica-sync:
     image: postgres-slave:16
     environment:
