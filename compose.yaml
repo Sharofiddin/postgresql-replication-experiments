@@ -16,6 +16,27 @@ services:
        QUARKUS_DATASOURCE_REPLICA-ASYNC_REACTIVE_URL: "postgresql://replica-async:5432/tasks"
        QUARKUS_DATASOURCE_REPLICA-ASYNC_USERNAME: "user"
        QUARKUS_DATASOURCE_REPLICA-ASYNC_PASSWORD: "password"
+
+##================================================
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - ./metrics-config/prometheus.yaml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+
+##==========================
+
+  grafana:
+       image: grafana/grafana:latest
+       ports:
+         - "3000:3000"
+       environment:
+         - GF_SECURITY_ADMIN_PASSWORD=admin
+       volumes:
+         - grafana-data:/var/lib/grafana
+
+##==========================
   primary:
     image: postgres:16
     environment:
@@ -34,12 +55,12 @@ services:
   postgres-exporter:
     image: prometheuscommunity/postgres-exporter:v0.17.1
     environment:
-      - DATA_SOURCE_NAME=postgresql://postgres:postgres@primary:5432/postgres?sslmode=disable
+      - DATA_SOURCE_NAME=postgresql://user:password@primary:5432/postgres?sslmode=disable
     ports:
       - "9187:9187"
-    volumes:
-      - ./metrics-config/queries.yml:/queries.yml
-    command: --extend.query-path=/queries.yml
+        #volumes:
+        #      - ./metrics-config/queries.yml:/queries.yml
+        #command: --extend.query-path=/queries.yml
     depends_on:
       - primary
   
@@ -116,3 +137,4 @@ volumes:
   replica-sync-2-data:
   replica-async-data:
   replica-async-2-data:
+  grafana-data:
